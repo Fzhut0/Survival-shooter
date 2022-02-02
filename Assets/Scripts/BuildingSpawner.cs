@@ -6,23 +6,22 @@ public class BuildingSpawner : MonoBehaviour
 {
     [SerializeField] List<GameObject> buildingSpawn;
 
-    int buildingAmount = 4;
+
+    int buildingAmount = 3;
 
 
     private void Start()
     {
-        /*
-         * actual code which will be used to spawn objects at the start of level
-         * 
-        for (int i = 0; i < buildingAmount; i++)
-        {
-            SpawnBuilding();
-        }
-        */
+
+
+
     }
 
     private void Update()
     {
+
+
+        StartCoroutine("BuildingAmountCheck");
 
         // Placeholder function for testing purposes
 
@@ -30,11 +29,11 @@ public class BuildingSpawner : MonoBehaviour
         {
             SpawnBuilding();
         }
-
     }
 
     void SpawnBuilding()
     {
+
         Vector3 spawnPos = new Vector3(Random.Range(200, 800), 100, Random.Range(200, 900));
 
         Ray checkHeight = new Ray(spawnPos, Vector3.down);
@@ -44,14 +43,44 @@ public class BuildingSpawner : MonoBehaviour
 
         float terHeight = Terrain.activeTerrain.SampleHeight(actualHeight.point) + transform.position.y;
 
-
         spawnPos.y = terHeight;
-
         Quaternion spawnRotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
 
-        Instantiate(buildingSpawn[Random.Range(0, buildingSpawn.Count)], spawnPos, spawnRotation);
+        Vector3 overlapBoxSize = new Vector3(150, 150, 150);
+        Collider[] buildingColliders = new Collider[5];
+        int buildingsToCheck = Physics.OverlapBoxNonAlloc(spawnPos, overlapBoxSize, buildingColliders, spawnRotation, 7);
+
+
+
+        if (buildingsToCheck == 0)
+        {
+            Instantiate(buildingSpawn[Random.Range(0, buildingSpawn.Count)], spawnPos, spawnRotation);
+        }
+        else
+        {
+            return;
+        }
 
     }
 
+    IEnumerator BuildingAmountCheck()
+    {
+        GameObject[] buildings = GameObject.FindGameObjectsWithTag("Building");
 
+        if (buildings.Length < buildingAmount)
+        {
+            SpawnBuilding();
+        }
+
+        yield return new WaitForSeconds(1);
+
+    }
 }
+
+
+
+
+
+
+
+
